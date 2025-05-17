@@ -32,14 +32,6 @@ assistente_co2/
 ├── .render.yaml # Configuração de deploy automático no Render
 ├── start_backend_assistente_co2.bat # Atalho para rodar localmente
 
-assistente_co2/
-├── backend_assistente_co2.py # FastAPI com lógica de avaliação e geração de relatórios
-├── openapi_assistente_CO2_render.json # Schema OpenAPI usado pelo GPT Builder
-├── requirements.txt # Dependências (FastAPI, fpdf, sqlite3)
-├── .render.yaml # Configuração de deploy automático no Render
-├── start_backend_assistente_co2.bat # Atalho para rodar localmente
-
-
 ---
 
 ## 🧪 Como testar localmente
