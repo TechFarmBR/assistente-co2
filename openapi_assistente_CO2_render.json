@@ -1,182 +1,170 @@
-﻿# Atualizar o schema OpenAPI com a nova URL da Render
-
-
-openapi_schema_render = {
-    "openapi": "3.1.0",
-    "info": {
-        "title": "API Assistente CO2",
-        "description": "API para avaliação automatizada de projetos de crédito de carbono com geração de relatórios, conformidade e benchmarking.",
-        "version": "1.0.1"
-    },
-    "servers": [
-        {
-            "url": "https://assistente-co2.onrender.com"
-        }
-    ],
-    "paths": {
-        "/avaliar": {
-            "post": {
-                "operationId": "avaliarProjeto",
-                "summary": "Avaliar projeto de carbono",
-                "description": "Avalia tecnicamente um projeto com base nos critérios definidos e retorna score, pontuação e conformidades.",
-                "requestBody": {
-                    "required": True,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/ProjetoCarbono"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Resultado da avaliação",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ResultadoAvaliacao"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/relatorio": {
-            "post": {
-                "operationId": "gerarRelatorioPdf",
-                "summary": "Gerar relatório PDF",
-                "description": "Gera um relatório em PDF com score e classificação do projeto",
-                "requestBody": {
-                    "required": True,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/ProjetoCarbono"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Link para download do PDF",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "url": {
-                                            "type": "string",
-                                            "format": "uri"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/comparar": {
-            "post": {
-                "operationId": "compararProjetos",
-                "summary": "Comparar múltiplos projetos",
-                "description": "Retorna ranking técnico com percentuais e projeto recomendado.",
-                "requestBody": {
-                    "required": True,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "projetos": {
-                                        "type": "array",
-                                        "items": {
-                                            "$ref": "#/components/schemas/ProjetoCarbono"
-                                        }
-                                    }
-                                },
-                                "required": ["projetos"]
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Ranking de projetos",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/ResumoRanking"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    },
-    "components": {
-        "schemas": {
-            "ProjetoCarbono": {
-                "type": "object",
-                "properties": {
-                    "programa_id": { "type": "integer" },
-                    "categoria_id": { "type": "integer" },
-                    "adicionalidade": { "type": "boolean" },
-                    "teste_barreiras": { "type": "boolean" },
-                    "permanencia_anos": { "type": "integer" },
-                    "vazamento_estimado": { "type": "number" },
-                    "ods": { "type": "boolean" },
-                    "impacto_social": { "type": "boolean" },
-                    "biodiversidade": { "type": "boolean" },
-                    "mrv": { "type": "boolean" },
-                    "validação_por_terceiros": { "type": "boolean" },
-                    "dmrv": { "type": "boolean" },
-                    "governança": { "type": "boolean" },
-                    "transparência": { "type": "boolean" },
-                    "compatibilidade_net_zero": { "type": "boolean" }
-                },
-                "required": ["programa_id", "adicionalidade"]
-            },
-            "ResultadoAvaliacao": {
-                "type": "object",
-                "properties": {
-                    "pontuacao_total": { "type": "number" },
-                    "porcentagem": { "type": "number" },
-                    "classificacao": { "type": "string" },
-                    "etapas": {
-                        "type": "object",
-                        "additionalProperties": { "type": "number" }
-                    },
-                    "conformidades": {
-                        "type": "array",
-                        "items": { "type": "string" }
-                    }
-                }
-            },
-            "ResumoRanking": {
-                "type": "object",
-                "properties": {
-                    "programa_id": { "type": "integer" },
-                    "pontuacao_ponderada": { "type": "number" },
-                    "percentual": { "type": "number" },
-                    "classificacao": { "type": "string" }
-                }
-            }
-        }
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "API Assistente CO2",
+    "description": "API para avaliação automatizada de projetos de crédito de carbono com geração de relatórios, conformidade e benchmarking.",
+    "version": "1.0.1"
+  },
+  "servers": [
+    {
+      "url": "https://assistente-co2.onrender.com"
     }
+  ],
+  "paths": {
+    "/avaliar": {
+      "post": {
+        "operationId": "avaliarProjeto",
+        "summary": "Avaliar projeto de carbono",
+        "description": "Avalia tecnicamente um projeto com base nos critérios definidos e retorna score, pontuação e conformidades.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjetoCarbono"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Resultado da avaliação",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultadoAvaliacao"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/relatorio": {
+      "post": {
+        "operationId": "gerarRelatorioPdf",
+        "summary": "Gerar relatório PDF",
+        "description": "Gera um relatório em PDF com score e classificação do projeto",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjetoCarbono"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Link para download do PDF",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "format": "uri"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/comparar": {
+      "post": {
+        "operationId": "compararProjetos",
+        "summary": "Comparar múltiplos projetos",
+        "description": "Retorna ranking técnico com percentuais e projeto recomendado.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "projetos": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ProjetoCarbono"
+                    }
+                  }
+                },
+                "required": ["projetos"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ranking de projetos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ResumoRanking"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ProjetoCarbono": {
+        "type": "object",
+        "properties": {
+          "programa_id": { "type": "integer" },
+          "categoria_id": { "type": "integer" },
+          "adicionalidade": { "type": "boolean" },
+          "teste_barreiras": { "type": "boolean" },
+          "permanencia_anos": { "type": "integer" },
+          "vazamento_estimado": { "type": "number" },
+          "ods": { "type": "boolean" },
+          "impacto_social": { "type": "boolean" },
+          "biodiversidade": { "type": "boolean" },
+          "mrv": { "type": "boolean" },
+          "validação_por_terceiros": { "type": "boolean" },
+          "dmrv": { "type": "boolean" },
+          "governança": { "type": "boolean" },
+          "transparência": { "type": "boolean" },
+          "compatibilidade_net_zero": { "type": "boolean" }
+        },
+        "required": ["programa_id", "adicionalidade"]
+      },
+      "ResultadoAvaliacao": {
+        "type": "object",
+        "properties": {
+          "pontuacao_total": { "type": "number" },
+          "porcentagem": { "type": "number" },
+          "classificacao": { "type": "string" },
+          "etapas": {
+            "type": "object",
+            "additionalProperties": { "type": "number" }
+          },
+          "conformidades": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      },
+      "ResumoRanking": {
+        "type": "object",
+        "properties": {
+          "programa_id": { "type": "integer" },
+          "pontuacao_ponderada": { "type": "number" },
+          "percentual": { "type": "number" },
+          "classificacao": { "type": "string" }
+        }
+      }
+    }
+  }
 }
-
-
-# Salvar como JSON
-render_schema_path = "/mnt/data/openapi_assistente_CO2_render.json"
-with open(render_schema_path, "w", encoding="utf-8") as f:
-    json.dump(openapi_schema_render, f, indent=2)
-
-
-render_schema_path
