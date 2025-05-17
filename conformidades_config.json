@@ -1,0 +1,22 @@
+﻿{
+  "CORSIA": {
+    "requisitos": ["adicionalidade", "teste_barreiras"],
+    "descricao": "Esquema de Compensação e Redução de Carbono para Aviação Internacional (ICAO)"
+  },
+  "CSRD": {
+    "requisitos": ["transparência", "governança"],
+    "descricao": "Diretiva da União Europeia sobre Relatórios de Sustentabilidade Corporativa"
+  },
+  "ODS": {
+    "requisitos": ["ods", "impacto_social"],
+    "descricao": "Objetivos de Desenvolvimento Sustentável das Nações Unidas"
+  },
+  "ISO_14064": {
+    "requisitos": ["validação_por_terceiros", "mrv"],
+    "descricao": "Norma ISO para verificação e quantificação de emissões de GEE"
+  },
+  "ICVCM_CoreCarbon": {
+    "requisitos": ["compatibilidade_net_zero", "dmrv"],
+    "descricao": "Padrão de integridade para créditos de carbono (ICVCM Core Carbon Principles)"
+  }
+}
