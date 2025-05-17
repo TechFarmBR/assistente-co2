@@ -26,21 +26,38 @@ jobs:
             | grep '"programa_id"'
 
   avaliar-detalhado-teste:
-    name: 🧪 Testar endpoint /avaliar_detalhado
+    name: 🧪 Testar /avaliar_detalhado + GET /avaliacao/{id}
     runs-on: ubuntu-latest
     env:
       API_KEY: ${{ secrets.API_KEY }}
     steps:
-      - name: Enviar dados para /avaliar_detalhado
+      - name: Enviar dados para /avaliar_detalhado e salvar UUID
+        id: avaliar
         run: |
-          curl -X POST https://assistente-co2.onrender.com/avaliar_detalhado \
+          RESPONSE=$(curl -s -X POST https://assistente-co2.onrender.com/avaliar_detalhado \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $API_KEY" \
-            -d '{"programa_id": 1, "adicionalidade": true}' \
-            | grep '"resultado"'
+            -d '{"programa_id": 1, "adicionalidade": true}')
+          echo "RESPONSE=$RESPONSE" >> $GITHUB_ENV
+          UUID=$(echo $RESPONSE | grep -oP '"id"\s*:\s*"\K[^"]+')
+          echo "UUID=$UUID" >> $GITHUB_ENV
+
+      - name: Requisitar /avaliacao/{uuid} com UUID retornado
+        run: |
+          curl -s https://assistente-co2.onrender.com/avaliacao/$UUID \
+            -H "Authorization: Bearer $API_KEY" \
+            | grep '"pontuacao_total"'
+
+      - name: Verificar integridade do score
+        run: |
+          SCORE=$(echo $RESPONSE | grep -oP '"pontuacao_total"\s*:\s*\K[0-9.]+')
+          if (( $(echo "$SCORE < 0" | bc -l) )) || (( $(echo "$SCORE > 14" | bc -l) )); then
+            echo "Score fora do intervalo esperado: $SCORE"
+            exit 1
+          fi
 
   relatorio-teste:
-    name: 📄 Verificar endpoint /relatorio com ID inválido
+    name: 📄 Verificar /relatorio com ID inválido
     runs-on: ubuntu-latest
     env:
       API_KEY: ${{ secrets.API_KEY }}
