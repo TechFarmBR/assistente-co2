@@ -45,6 +45,7 @@ class ResumoRanking(BaseModel):
 
 # ========== AUTENTICAÇÃO ==========
 API_KEY = "co2-4Zx8tA91K3rQp72N"
+
 def validar_chave(authorization: Optional[str] = Header(None)):
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Token ausente")
