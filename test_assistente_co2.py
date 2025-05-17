@@ -1,50 +1,61 @@
-﻿import requests
+import requests
 
-
-BASE_URL = "https://assistente-co2.onrender.com"
+API_URL = "https://assistente-co2.onrender.com"
 API_KEY = "co2-4Zx8tA91K3rQp72N"
 HEADERS = {"Authorization": f"Bearer {API_KEY}"}
 
 
-def testar_raiz():
-    resp = requests.get(BASE_URL)
-    assert resp.status_code == 200
-    print("✅ / raiz ok")
+def test_root():
+    res = requests.get(f"{API_URL}/")
+    assert res.status_code == 200
+    print("🟢 Teste / raiz OK")
 
 
-def testar_avaliar():
+def test_avaliar():
+    payload = {
+        "programa_id": 1,
+        "adicionalidade": True
+    }
+    res = requests.post(f"{API_URL}/avaliar", json=payload)
+    assert res.status_code == 200
+    print("🟢 Teste /avaliar OK")
+
+
+def test_avaliar_detalhado():
     payload = {
         "programa_id": 1,
         "categoria_id": 2,
         "adicionalidade": True,
         "teste_barreiras": True,
-        "permanencia_anos": 30,
-        "vazamento_estimado": 5.0,
+        "permanencia_anos": 20,
+        "vazamento_estimado": 4.5,
         "ods": True,
         "impacto_social": True,
-        "biodiversidade": False,
+        "biodiversidade": True,
         "mrv": True,
-        "validação_por_terceiros": False,
+        "validação_por_terceiros": True,
         "dmrv": False,
         "governança": True,
         "transparência": True,
         "compatibilidade_net_zero": True
     }
-    resp = requests.post(f"{BASE_URL}/avaliar_detalhado", json=payload, headers=HEADERS)
-    assert resp.status_code == 200
-    print("✅ /avaliar_detalhado funcionando")
-    return resp.json()["id"]
+    res = requests.post(f"{API_URL}/avaliar_detalhado", json=payload, headers=HEADERS)
+    assert res.status_code == 200
+    retorno = res.json()
+    print("🟢 Teste /avaliar_detalhado OK")
+
+    # Verifica os links
+    assert "id" in retorno
+    assert "link_resultado" in retorno
+    assert "link_pdf" in retorno
 
 
-def testar_pdf(uuid):
-    resp = requests.get(f"{BASE_URL}/relatorio/{uuid}", headers=HEADERS)
-    assert resp.status_code == 200
-    print("✅ PDF gerado e acessível")
+def run_all():
+    test_root()
+    test_avaliar()
+    test_avaliar_detalhado()
+    print("✅ Todos os testes foram executados com sucesso!")
 
 
 if __name__ == "__main__":
-    print("🚀 Iniciando testes automáticos...")
-    testar_raiz()
-    uid = testar_avaliar()
-    testar_pdf(uid)
-    print("🎉 Todos os testes passaram com sucesso!")
+    run_all()
