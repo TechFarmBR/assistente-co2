@@ -1,12 +1,18 @@
-﻿from fastapi import FastAPI
+from fastapi import FastAPI, Header, HTTPException, Depends  
 from pydantic import BaseModel
 from typing import List, Optional
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.middleware.cors import CORSMiddleware
 
+import uuid
+import json
+import sqlite3
+from datetime import datetime
+from fpdf import FPDF
 
 app = FastAPI(title="API Assistente CO2", version="1.0.1")
 
-
+# ========== MODELOS ==========
 class ProjetoCarbono(BaseModel):
     programa_id: int
     categoria_id: Optional[int] = None
@@ -24,7 +30,6 @@ class ProjetoCarbono(BaseModel):
     transparência: Optional[bool] = False
     compatibilidade_net_zero: Optional[bool] = False
 
-
 class ResultadoAvaliacao(BaseModel):
     pontuacao_total: float
     porcentagem: float
@@ -32,16 +37,24 @@ class ResultadoAvaliacao(BaseModel):
     etapas: dict
     conformidades: List[str]
 
-
 class ResumoRanking(BaseModel):
     programa_id: int
     pontuacao_ponderada: float
     percentual: float
     classificacao: str
 
+# ========== AUTENTICAÇÃO ==========
+API_KEY = "SUA_CHAVE_PRIVADA"
+def validar_chave(authorization: Optional[str] = Header(None)):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Token ausente")
+    token = authorization.split("Bearer ")[1]
+    if token != API_KEY:
+        raise HTTPException(status_code=403, detail="Chave inválida")
+    return True
 
-@app.post("/avaliar", response_model=ResultadoAvaliacao)
-def avaliar_projeto(dados: ProjetoCarbono):
+# ========== LÓGICA DE AVALIAÇÃO ==========
+def avaliar(dados: dict) -> dict:
     etapas = {"1": 2.8, "3": 2.0, "4": 2.6, "5": 3.2}
     total = sum(etapas.values())
     percentual = round((total / 13.8) * 100, 1)
@@ -51,25 +64,28 @@ def avaliar_projeto(dados: ProjetoCarbono):
         "Baixa Integridade"
     )
     conformidades = []
-    if dados.adicionalidade and dados.teste_barreiras:
+    if dados.get("adicionalidade") and dados.get("teste_barreiras"):
         conformidades.append("CORSIA")
-    if dados.transparência and dados.governança:
+    if dados.get("transparência") and dados.get("governança"):
         conformidades.append("CSRD")
-    if dados.ods or dados.impacto_social:
+    if dados.get("ods") or dados.get("impacto_social"):
         conformidades.append("ODS")
-    return ResultadoAvaliacao(
-        pontuacao_total=total,
-        porcentagem=percentual,
-        classificacao=classificacao,
-        etapas=etapas,
-        conformidades=conformidades
-    )
+    return {
+        "pontuacao_total": total,
+        "porcentagem": percentual,
+        "classificacao": classificacao,
+        "etapas": etapas,
+        "conformidades": conformidades
+    }
 
+# ========== ENDPOINTS ==========
+@app.post("/avaliar", response_model=ResultadoAvaliacao)
+def avaliar_projeto(dados: ProjetoCarbono):
+    return avaliar(dados.dict())
 
 @app.post("/relatorio")
 def gerar_relatorio_pdf(dados: ProjetoCarbono):
     return {"url": "https://api.exemplo.com/downloads/relatorio_final.pdf"}
-
 
 @app.post("/comparar", response_model=List[ResumoRanking])
 def comparar_projetos(projetos: dict):
@@ -86,15 +102,10 @@ def comparar_projetos(projetos: dict):
         })
     return JSONResponse(content=rankings)
 
-# ========= 🧩 Extensão: salvar e recuperar avaliações =========
-
-import os
-from fastapi.middleware.cors import CORSMiddleware
-
-# Habilita CORS se for usar Streamlit externo
+# ========== SALVAR E CONSULTAR AVALIAÇÕES ==========
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Restringir se necessário
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
