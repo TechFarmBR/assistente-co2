@@ -1,5 +1,8 @@
 # 🧠 Assistente_CO2 — GPT + API para Due Diligence de Projetos de Carbono
 
+![API Render](https://img.shields.io/badge/API%20Status-online-brightgreen?style=flat-square)
+![GPT Custom](https://img.shields.io/badge/GPT%20Custom-integrado-blueviolet?style=flat-square)
+
 Assistente_CO2 é um projeto de análise automatizada para avaliação técnica de programas de créditos de carbono com base em critérios regulatórios, benchmarks e geração de relatórios estruturados.
 
 Este projeto combina:
