@@ -1,0 +1,45 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.so
+
+
+# Virtual environments
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+*.envrc
+
+
+# Streamlit cache
+.streamlit/
+
+
+# IDEs
+.vscode/
+.idea/
+
+
+# Arquivos de ambiente reais (somente exemplo é versionado)
+.env
+
+
+# SQLite DB gerado localmente
+carbono.db
+*.sqlite3
+
+
+# PDFs e relatórios temporários
+*.pdf
+*.txt
+
+
+# Arquivos de execução ou deploy
+start_*.bat
+*.zip
+*.log
