@@ -87,5 +87,6 @@ TechFarmBR
 📬 Contato: pedroneto.f@hotmail.com
 🔗 GitHub: github.com/TechFarmBR/assistente-co2
 
-📄 Licença
-Distribuído sob licença MIT.
+📄 Licença  
+Distribuído sob a [Licença MIT](https://github.com/TechFarmBR/assistente-co2/blob/main/LICENSE).
+
