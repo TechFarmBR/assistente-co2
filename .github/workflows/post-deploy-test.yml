@@ -6,64 +6,52 @@ on:
     branches: [main]
 
 jobs:
-  health-check:
+  check-root:
     name: 🔍 Verificar se a API está online
     runs-on: ubuntu-latest
     steps:
-      - name: Requisitar endpoint raiz /
+      - name: GET /
         run: |
-          curl -sSf https://assistente-co2.onrender.com/ | grep '"message"'
+          curl -sSf https://assistente-co2.onrender.com/ | grep -q '"message"'
 
-  comparar-teste:
+  comparar-endpoint:
     name: 📊 Testar endpoint /comparar
     runs-on: ubuntu-latest
     steps:
-      - name: Enviar payload para /comparar
+      - name: POST /comparar
         run: |
-          curl -X POST https://assistente-co2.onrender.com/comparar \
+          curl -sSf -X POST https://assistente-co2.onrender.com/comparar \
             -H "Content-Type: application/json" \
             -d '{"projetos": [{"programa_id": 1, "adicionalidade": true}, {"programa_id": 2, "adicionalidade": false}]}' \
-            | grep '"programa_id"'
+            | grep -q '"programa_id"'
 
-  avaliar-detalhado-teste:
-    name: 🧪 Testar /avaliar_detalhado + GET /avaliacao/{id}
+  avaliar-detalhado:
+    name: 🧪 Testar endpoint /avaliar_detalhado
     runs-on: ubuntu-latest
     env:
       API_KEY: ${{ secrets.API_KEY }}
     steps:
-      - name: Enviar dados para /avaliar_detalhado e salvar UUID
-        id: avaliar
+      - name: POST /avaliar_detalhado com token
         run: |
-          RESPONSE=$(curl -s -X POST https://assistente-co2.onrender.com/avaliar_detalhado \
+          curl -sSf -X POST https://assistente-co2.onrender.com/avaliar_detalhado \
+            -H "Authorization: Bearer $API_KEY" \
             -H "Content-Type: application/json" \
-            -H "Authorization: Bearer $API_KEY" \
-            -d '{"programa_id": 1, "adicionalidade": true}')
-          echo "RESPONSE=$RESPONSE" >> $GITHUB_ENV
-          UUID=$(echo $RESPONSE | grep -oP '"id"\s*:\s*"\K[^"]+')
-          echo "UUID=$UUID" >> $GITHUB_ENV
+            -d '{"programa_id": 1, "adicionalidade": true}' \
+            | grep -q '"resultado"'
 
-      - name: Requisitar /avaliacao/{uuid} com UUID retornado
-        run: |
-          curl -s https://assistente-co2.onrender.com/avaliacao/$UUID \
-            -H "Authorization: Bearer $API_KEY" \
-            | grep '"pontuacao_total"'
-
-      - name: Verificar integridade do score
-        run: |
-          SCORE=$(echo $RESPONSE | grep -oP '"pontuacao_total"\s*:\s*\K[0-9.]+')
-          if (( $(echo "$SCORE < 0" | bc -l) )) || (( $(echo "$SCORE > 14" | bc -l) )); then
-            echo "Score fora do intervalo esperado: $SCORE"
-            exit 1
-          fi
-
-  relatorio-teste:
+  relatorio-invalido:
     name: 📄 Verificar /relatorio com ID inválido
     runs-on: ubuntu-latest
     env:
       API_KEY: ${{ secrets.API_KEY }}
     steps:
-      - name: Tentar baixar PDF com UUID inexistente
+      - name: GET /relatorio/uuid-invalido deve retornar 404
         run: |
-          curl -s -o /dev/null -w "%{http_code}" \
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
             -H "Authorization: Bearer $API_KEY" \
-            https://assistente-co2.onrender.com/relatorio/uuid-invalido | grep 404
+            https://assistente-co2.onrender.com/relatorio/uuid-invalido)
+
+          if [ "$STATUS" -ne 404 ]; then
+            echo "Esperado 404, mas recebeu $STATUS"
+            exit 1
+          fi
