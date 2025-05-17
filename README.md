@@ -3,87 +3,89 @@
 ![API Render](https://img.shields.io/badge/API%20Status-online-brightgreen?style=flat-square)
 ![GPT Custom](https://img.shields.io/badge/GPT%20Custom-integrado-blueviolet?style=flat-square)
 
-Assistente_CO2 é um projeto de análise automatizada para avaliação técnica de programas de créditos de carbono com base em critérios regulatórios, benchmarks e geração de relatórios estruturados.
-
-Este projeto combina:
-
-- ✅ API FastAPI (hospedada na Render)
-- ✅ Integração via OpenAPI com ChatGPT (GPTs personalizados)
-- ✅ Avaliação, comparação e geração de relatórios em PDF
+**Assistente_CO2** é um sistema automatizado para avaliação técnica e due diligence de programas de créditos de carbono, com base em critérios regulatórios, geração de relatórios em PDF e integração com GPTs personalizados (ChatGPT Actions).
 
 ---
 
 ## 🚀 Funcionalidades
 
-- 📊 **Avaliação por critérios** como adicionalidade, permanência, vazamento, ODS, MRV, governança, entre outros.
-- 📈 **Benchmarking** entre múltiplos projetos com recomendação automatizada.
-- 📄 **Relatórios em PDF** com score por etapa e classificação final.
-- 🔗 **Conformidade automática** com padrões como CORSIA, CSRD e ODS.
-- 🤖 **Integração direta com GPT personalizado** (ChatGPT Actions).
+- 📊 Avaliação automatizada por critérios técnicos (adicionalidade, permanência, MRV, ODS, governança...)
+- 📈 Benchmarking entre múltiplos projetos com ranking e recomendação
+- 📄 Geração de relatórios técnicos estruturados em PDF
+- 🔐 Conformidade automática com CORSIA, CSRD e ODS
+- 🤖 Integração direta com ChatGPT personalizado via OpenAPI
 
 ---
 
-## 📦 Estrutura do projeto
+## 📦 Estrutura do Projeto
 
 assistente_co2/
-├── backend_assistente_co2.py # FastAPI com lógica de avaliação e geração de relatórios
-├── openapi_assistente_CO2_render.json # Schema OpenAPI usado pelo GPT Builder
-├── requirements.txt # Dependências (FastAPI, fpdf, sqlite3)
-├── .render.yaml # Configuração de deploy automático no Render
-├── start_backend_assistente_co2.bat # Atalho para rodar localmente
+├── backend_assistente_co2.py        # API FastAPI com avaliação + geração de PDF
+├── app_streamlit.py                 # Painel visual em Streamlit
+├── openapi_assistente_CO2_render.json # Schema OpenAPI para GPT Builder
+├── requirements.txt                 # Dependências (FastAPI, FPDF, Streamlit, etc)
+├── .render.yaml                     # Configuração de deploy automático (Render)
+├── .env.example                     # Variável de ambiente simulada
+├── .gitignore                       # Arquivos ignorados no versionamento
+└── start_backend_assistente_co2.bat # Execução local rápida (Windows)
 
 ---
 
-## 🧪 Como testar localmente
-
-### 1. Instale as dependências
-
-```bash
+🧪 Testando Localmente
+Instale as dependências:
 pip install -r requirements.txt
 
+Rode a API:
 uvicorn backend_assistente_co2:app --reload
-Acesse em: http://127.0.0.1:8000/docs
 
-🌐A API está publicada e acessível via HTTPS:
+Acesse a documentação:
+http://127.0.0.1:8000/docs
+
+🌐 API Pública (Render)
+A API está ativa em:
 https://assistente-co2.onrender.com
 
-⚙️Endpoints principais
-| Método | Caminho      | Descrição                                 |
-| ------ | ------------ | ----------------------------------------- |
-| POST   | `/avaliar`   | Avalia tecnicamente um projeto de carbono |
-| POST   | `/relatorio` | Gera relatório técnico em PDF             |
-| POST   | `/comparar`  | Compara múltiplos projetos por pontuação  |
+Endpoints principais:
 
-🤖GPT Personalizado
-Você pode interagir com o assistente via ChatGPT:
+Método	Caminho	Descrição
+POST	/avaliar	Avaliação simples por critérios técnicos
+POST	/avaliar_detalhado	Avaliação + salvar com UUID e PDF
+POST	/relatorio	Gera PDF técnico (via dados diretos)
+POST	/comparar	Compara múltiplos projetos por score
+GET	/avaliacao/{uid}	Retorna avaliação salva por UUID
+GET	/relatorio/{uid}	Baixa o PDF gerado via UUID
 
+🤖 GPT Personalizado (ChatGPT)
+Você pode interagir via ChatGPT com o GPT customizado:
 🔗 https://chatgpt.com/g/g-6827ebbc7e548191be3721efe77464c9-assistente-co2
+
 Exemplos de comandos:
-Avalie um projeto com 30 anos de permanência e governança forte.
+"Avalie um projeto com 30 anos de permanência e impacto social."
 
-Gere o relatório em PDF da última avaliação.
+"Compare dois projetos com pontuações diferentes."
 
-Compare dois projetos com perfis diferentes de impacto e MRV.
+"Gere o PDF da última avaliação salva."
 
-Conformidades suportadas
-Este projeto verifica alinhamento automático com:
+✅ Conformidades Suportadas
+Este sistema detecta conformidade com:
 
-🌍 CORSIA – Carbon Offsetting and Reduction Scheme for International Aviation
+🌍 CORSIA – Aviação internacional (ICAO)
 
-📊 CSRD – Corporate Sustainability Reporting Directive
+🏢 CSRD – Diretiva de Relatórios de Sustentabilidade Corporativa (UE)
 
 🎯 ODS – Objetivos de Desenvolvimento Sustentável (ONU)
 
-📤Deploy automático
-A infraestrutura é integrada à plataforma Render.com com deploy contínuo via .render.yaml.
+📤 Deploy Automático
+Deploy contínuo configurado com Render:
+
+Arquivo .render.yaml define build e start.
+
+GitHub + Render garantem CI/CD automático.
 
 👨‍💻 Desenvolvido por
 TechFarmBR
-Contato: pedroneto.f@hotmail.com
-Repositório oficial: github.com/TechFarmBR/assistente-co2
+📬 Contato: pedroneto.f@hotmail.com
+🔗 GitHub: github.com/TechFarmBR/assistente-co2
 
 📄 Licença
-Este projeto está licenciado sob os termos da MIT License.
-
-
-
+Distribuído sob licença MIT.
