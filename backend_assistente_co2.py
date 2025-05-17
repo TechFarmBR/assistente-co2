@@ -183,3 +183,13 @@ def gerar_pdf_por_id(uid: str, auth: bool = Depends(validar_chave)):
 
     pdf.output(nome_arquivo)
     return FileResponse(nome_arquivo, media_type="application/pdf", filename=nome_arquivo)
+
+# ========== ENDPOINT RAIZ ==========
+@app.get("/")
+def root():
+    return {
+        "message": "✅ API Assistente CO2 está online.",
+        "documentação": "/docs",
+        "repositório": "https://github.com/TechFarmBR/assistente-co2"
+    }
+
