@@ -1,18 +1,22 @@
-from fastapi import FastAPI, Header, HTTPException, Depends  
+from fastapi import FastAPI, Header, HTTPException, Depends
 from pydantic import BaseModel
 from typing import List, Optional
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 
+import os
 import uuid
 import json
 import sqlite3
 from datetime import datetime
 from fpdf import FPDF
+from dotenv import load_dotenv
 
+# ========= Inicialização =========
+load_dotenv()
 app = FastAPI(title="API Assistente CO2", version="1.0.1")
 
-# ========== MODELOS ==========
+# ========= Modelos =========
 class ProjetoCarbono(BaseModel):
     programa_id: int
     categoria_id: Optional[int] = None
@@ -43,8 +47,8 @@ class ResumoRanking(BaseModel):
     percentual: float
     classificacao: str
 
-# ========== AUTENTICAÇÃO ==========
-API_KEY = "co2-4Zx8tA91K3rQp72N"
+# ========= Autenticação =========
+API_KEY = os.getenv("API_KEY", "changeme-key")
 
 def validar_chave(authorization: Optional[str] = Header(None)):
     if not authorization or not authorization.startswith("Bearer "):
@@ -54,7 +58,7 @@ def validar_chave(authorization: Optional[str] = Header(None)):
         raise HTTPException(status_code=403, detail="Chave inválida")
     return True
 
-# ========== LÓGICA DE AVALIAÇÃO ==========
+# ========= Avaliação =========
 def avaliar(dados: dict) -> dict:
     etapas = {"1": 2.8, "3": 2.0, "4": 2.6, "5": 3.2}
     total = sum(etapas.values())
@@ -71,6 +75,7 @@ def avaliar(dados: dict) -> dict:
         conformidades.append("CSRD")
     if dados.get("ods") or dados.get("impacto_social"):
         conformidades.append("ODS")
+
     return {
         "pontuacao_total": total,
         "porcentagem": percentual,
@@ -79,31 +84,7 @@ def avaliar(dados: dict) -> dict:
         "conformidades": conformidades
     }
 
-# ========== ENDPOINTS ==========
-@app.post("/avaliar", response_model=ResultadoAvaliacao)
-def avaliar_projeto(dados: ProjetoCarbono):
-    return avaliar(dados.dict())
-
-@app.post("/relatorio")
-def gerar_relatorio_pdf(dados: ProjetoCarbono):
-    return {"url": "https://api.exemplo.com/downloads/relatorio_final.pdf"}
-
-@app.post("/comparar", response_model=List[ResumoRanking])
-def comparar_projetos(projetos: dict):
-    rankings = []
-    for i, proj in enumerate(projetos["projetos"]):
-        score = 10 + i
-        pct = round((score / 13.8) * 100, 1)
-        classificacao = "Alta Integridade" if pct >= 85 else "Média Integridade"
-        rankings.append({
-            "programa_id": proj["programa_id"],
-            "pontuacao_ponderada": score,
-            "percentual": pct,
-            "classificacao": classificacao
-        })
-    return JSONResponse(content=rankings)
-
-# ========== SALVAR E CONSULTAR AVALIAÇÕES ==========
+# ========= CORS para integração externa =========
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -112,6 +93,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ========= Banco de Dados =========
 DB_PATH = "carbono.db"
 
 def salvar_avaliacao_no_banco(projeto: dict, resultado: dict) -> str:
@@ -131,6 +113,19 @@ def salvar_avaliacao_no_banco(projeto: dict, resultado: dict) -> str:
     conn.commit()
     conn.close()
     return uid
+
+# ========= Endpoints =========
+@app.get("/")
+def root():
+    return {
+        "message": "✅ API Assistente CO2 está online.",
+        "documentação": "/docs",
+        "repositório": "https://github.com/TechFarmBR/assistente-co2"
+    }
+
+@app.post("/avaliar", response_model=ResultadoAvaliacao)
+def avaliar_projeto(dados: ProjetoCarbono):
+    return avaliar(dados.dict())
 
 @app.post("/avaliar_detalhado")
 def avaliar_e_salvar(projeto: ProjetoCarbono, auth: bool = Depends(validar_chave)):
@@ -184,12 +179,21 @@ def gerar_pdf_por_id(uid: str, auth: bool = Depends(validar_chave)):
     pdf.output(nome_arquivo)
     return FileResponse(nome_arquivo, media_type="application/pdf", filename=nome_arquivo)
 
-# ========== ENDPOINT RAIZ ==========
-@app.get("/")
-def root():
-    return {
-        "message": "✅ API Assistente CO2 está online.",
-        "documentação": "/docs",
-        "repositório": "https://github.com/TechFarmBR/assistente-co2"
-    }
+@app.post("/relatorio")
+def gerar_relatorio_pdf(dados: ProjetoCarbono):
+    return {"url": "https://api.exemplo.com/downloads/relatorio_final.pdf"}
 
+@app.post("/comparar", response_model=List[ResumoRanking])
+def comparar_projetos(projetos: dict):
+    rankings = []
+    for i, proj in enumerate(projetos["projetos"]):
+        score = 10 + i
+        pct = round((score / 13.8) * 100, 1)
+        classificacao = "Alta Integridade" if pct >= 85 else "Média Integridade"
+        rankings.append({
+            "programa_id": proj["programa_id"],
+            "pontuacao_ponderada": score,
+            "percentual": pct,
+            "classificacao": classificacao
+        })
+    return JSONResponse(content=rankings)
