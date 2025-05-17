@@ -58,6 +58,20 @@ def validar_chave(authorization: Optional[str] = Header(None)):
         raise HTTPException(status_code=403, detail="Chave inválida")
     return True
 
+# ========= Conformidades dinâmicas =========
+def detectar_conformidades(dados: dict) -> List[str]:
+    try:
+        with open("conformidades_config.json", "r", encoding="utf-8") as file:
+            regras = json.load(file)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao carregar conformidades: {e}")
+    
+    conformidades = []
+    for item in regras.get("conformidades", []):
+        if all(dados.get(campo) for campo in item.get("criterios", [])):
+            conformidades.append(item["nome"])
+    return conformidades
+
 # ========= Avaliação =========
 def avaliar(dados: dict) -> dict:
     etapas = {"1": 2.8, "3": 2.0, "4": 2.6, "5": 3.2}
@@ -68,13 +82,7 @@ def avaliar(dados: dict) -> dict:
         "Média Integridade" if percentual >= 60 else
         "Baixa Integridade"
     )
-    conformidades = []
-    if dados.get("adicionalidade") and dados.get("teste_barreiras"):
-        conformidades.append("CORSIA")
-    if dados.get("transparência") and dados.get("governança"):
-        conformidades.append("CSRD")
-    if dados.get("ods") or dados.get("impacto_social"):
-        conformidades.append("ODS")
+    conformidades = detectar_conformidades(dados)
 
     return {
         "pontuacao_total": total,
@@ -84,7 +92,7 @@ def avaliar(dados: dict) -> dict:
         "conformidades": conformidades
     }
 
-# ========= CORS para integração externa =========
+# ========= Middleware CORS =========
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
