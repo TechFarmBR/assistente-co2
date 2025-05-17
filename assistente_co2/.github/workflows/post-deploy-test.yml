@@ -1,0 +1,26 @@
+name: Post-deploy API healthcheck
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  health-check:
+    name: 🔍 Verificar se a API está online
+    runs-on: ubuntu-latest
+    steps:
+      - name: Requisitar endpoint raiz /
+        run: |
+          curl -sSf https://assistente-co2.onrender.com/ | grep '"message"'
+
+  comparar-teste:
+    name: 📊 Testar endpoint /comparar
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enviar payload de exemplo
+        run: |
+          curl -X POST https://assistente-co2.onrender.com/comparar \
+            -H "Content-Type: application/json" \
+            -d '{"projetos": [{"programa_id": 1, "adicionalidade": true}, {"programa_id": 2, "adicionalidade": false}]}' \
+            | grep '"programa_id"'
