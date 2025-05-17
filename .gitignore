@@ -41,3 +41,6 @@ carbono.db
 start_*.bat
 *.zip
 *.log
+
+# Ignora schema antigo de LocalTunnel
+openapi_assistente_CO2_locatunnel.json
