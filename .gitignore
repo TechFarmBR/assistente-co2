@@ -1,4 +1,9 @@
-﻿# Python
+# ============================
+# IGNORAÇÃO DE ARQUIVOS GIT
+# Projeto Assistente_CO2
+# ============================
+
+# Python cache e binários
 __pycache__/
 *.py[cod]
 *.pyo
@@ -6,8 +11,7 @@ __pycache__/
 *.pyc
 *.so
 
-
-# Virtual environments
+# Ambientes virtuais
 .venv/
 env/
 venv/
@@ -15,31 +19,25 @@ ENV/
 env.bak/
 *.envrc
 
-
-# Streamlit cache
+# Streamlit e cache local
 .streamlit/
 
-
-# IDEs
+# Configurações de IDE
 .vscode/
 .idea/
 
-
-# Arquivos de ambiente reais (somente exemplo é versionado)
+# Variáveis de ambiente (exceto exemplo)
 .env
 
-
-# SQLite DB gerado localmente
+# Banco de dados local
 carbono.db
 *.sqlite3
 
-
-# PDFs e relatórios temporários
+# Relatórios e PDFs gerados
 *.pdf
 *.txt
 
-
-# Arquivos de execução ou deploy
+# Executáveis e arquivos de build
 start_*.bat
 *.zip
 *.log
