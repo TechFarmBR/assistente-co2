@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Header, HTTPException, Depends
+from fastapi import FastAPI, Header, HTTPException, Depends, UploadFile, File
 from pydantic import BaseModel
 from typing import List, Optional
 from fastapi.responses import JSONResponse, FileResponse
@@ -11,6 +11,7 @@ import sqlite3
 from datetime import datetime
 from fpdf import FPDF
 from dotenv import load_dotenv
+import fitz  # PyMuPDF
 
 # ========= Inicialização =========
 load_dotenv()
@@ -205,3 +206,14 @@ def comparar_projetos(projetos: dict):
             "classificacao": classificacao
         })
     return JSONResponse(content=rankings)
+
+# ========= Novo Endpoint: /extrair_texto_pdf =========
+@app.post("/extrair_texto_pdf")
+def extrair_texto_pdf(file: UploadFile = File(...), auth: bool = Depends(validar_chave)):
+    try:
+        contents = file.file.read()
+        with fitz.open(stream=contents, filetype="pdf") as doc:
+            texto_total = "\n".join([page.get_text() for page in doc])
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Erro ao processar PDF: {str(e)}")
+    return {"conteudo": texto_total[:2000]}  # Limite de 2000 caracteres
