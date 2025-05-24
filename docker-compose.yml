@@ -1,14 +1,15 @@
-version: "3.8"
+version: "3.9"
 
 services:
   assistente-co2:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: assistente-co2
+    container_name: assistente-co2-api
     ports:
       - "10000:10000"
     environment:
       - API_KEY=co2-4Zx8tA91K3rQp72N
     volumes:
       - .:/app
+    restart: unless-stopped
