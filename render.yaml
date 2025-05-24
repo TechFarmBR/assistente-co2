@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: assistente-co2
+    env: docker
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: API_KEY
+        value: co2-4Zx8tA91K3rQp72N
